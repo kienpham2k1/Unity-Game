@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
-[RequireComponent(typeof(BoxCollider2D))]
+[RequireComponent(typeof(CapsuleCollider2D))]
 public class EnemyAI : MonoBehaviour
 {
     //Reference to waypoints
@@ -11,16 +11,18 @@ public class EnemyAI : MonoBehaviour
     int idChangeValue = 1;
     //Speed of movement or flying
     public float speed = 2;
+    Animator animator;
 
-
+    private void Start() { animator = GetComponent<Animator>(); }
     private void Reset()
     {
+
         Init();
     }
 
     void Init()
     {
-        GetComponent<BoxCollider2D>().isTrigger = true;
+        GetComponent<CapsuleCollider2D>().isTrigger = false;
 
         GameObject root = new GameObject(name + "_Root");
         root.transform.position = transform.position;
@@ -57,5 +59,14 @@ public class EnemyAI : MonoBehaviour
                 idChangeValue = 1;
             nextID += idChangeValue;
         }
+    }
+    public void JumpedOn()
+    {
+        animator.SetTrigger("Death");
+        // Death();
+    }
+    private void Death()
+    {
+        Destroy(this.gameObject);
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform groundCheckCollider;
     [SerializeField] Transform overHeadCheckCollider;
     [SerializeField] LayerMask groundLayer;
+    [SerializeField] Text cherryCountText;
 
     const float groundCheckRadius = 0.2f;
     const float overHeadCheckRadius = 0.2f;
@@ -20,10 +22,13 @@ public class PlayerController : MonoBehaviour
     float runSpeedModifier = 2f;
     float crouchSpeedModifier = 0.1f;
 
-    bool facingRight = true;
-    bool isRunnin;
-    bool jump;
-    bool isGrounded;
+    [SerializeField] int cherries = 0;
+
+    [SerializeField] JumpState jumpState = JumpState.Grounded;
+    [SerializeField] bool facingRight = true;
+    [SerializeField] bool isRunnin;
+    [SerializeField] bool jump;
+    [SerializeField] bool isGrounded;
     [SerializeField] bool crouchPressed;
     private void Awake()
     {
@@ -54,6 +59,27 @@ public class PlayerController : MonoBehaviour
     {
         Move(horizontalValue, jump, crouchPressed);
         GroundCheck();
+    }
+    private void OnTriggerEnter2D(Collider2D collider2D)
+    {
+        if (collider2D.tag == "Cherry")
+        {
+            Destroy(collider2D.gameObject);
+            cherries += 1;
+            cherryCountText.text = cherries.ToString();
+
+        }
+    }
+    private void OnCollisionEnter2D(Collision2D collision2D)
+
+    {
+        EnemyAI enemy = collision2D.gameObject.GetComponent<EnemyAI>();
+        if (collision2D.gameObject.tag == "Enemy" && isGrounded == false)// && jumpState == JumpState.InFlight)
+        {
+            // Debug.Log("Hit Enemy");
+            // Destroy(collision2D.gameObject);
+            enemy.JumpedOn();
+        }
     }
     void GroundCheck()
     {
@@ -108,5 +134,13 @@ public class PlayerController : MonoBehaviour
         }
         animator.SetFloat("xVelocity", Mathf.Abs(rb.velocity.x));
         #endregion
+    }
+    public enum JumpState
+    {
+        Grounded,
+        PrepareToJump,
+        Jumping,
+        InFlight,
+        Landed
     }
 }
